@@ -15,6 +15,7 @@ class Complaint(models.Model):
         ('PENDING', 'Pending'),
         ('UNDER_REVIEW', 'Under Review'),
         ('RESOLVED', 'Resolved'),
+        ('REJECTED', 'Rejected'),
     ]
 
     tracking_id = models.CharField(max_length=20, unique=True, editable=False, db_index=True)

@@ -19,6 +19,13 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
+# When True, management/analytics APIs do not require a staff Django session (local dev with Vite).
+# Defaults to DEBUG; set ADMIN_API_RELAX_PERMISSIONS=false in .env to force staff checks while DEBUG is on.
+ADMIN_API_RELAX_PERMISSIONS = env.bool(
+    'ADMIN_API_RELAX_PERMISSIONS',
+    default=DEBUG,
+)
+
 ALLOWED_HOSTS = ['*'] # In production, restrict this to specific domains
 
 # Application definition

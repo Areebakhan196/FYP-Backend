@@ -22,5 +22,12 @@ class ComplaintSerializer(serializers.ModelSerializer):
 class ComplaintStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Complaint
-        fields = ['tracking_id', 'status', 'created_at', 'updated_at']
-        read_only_fields = ['tracking_id', 'created_at', 'updated_at']
+        fields = [
+            'tracking_id',
+            'status',
+            'created_at',
+            'updated_at',
+            'audio_file',
+            'evidence_image',
+        ]
+        read_only_fields = ['tracking_id', 'created_at', 'updated_at', 'audio_file', 'evidence_image']

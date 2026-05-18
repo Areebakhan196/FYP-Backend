@@ -13,6 +13,7 @@ A production-ready, industry-level backend for anonymous reporting, built with D
 
 ## Tech Stack
 - **Framework**: Django 4.2+ (DRF)
+- **Frontend**: React + Tailwind CSS
 - **Database**: MySQL
 - **Security**: Cryptography (Fernet/AES)
 - **File Handling**: Pydub for audio processing
@@ -25,6 +26,7 @@ silent_reporter/
 ├── security/           # Encryption/Decryption utilities
 ├── administration/     # Admin dashboard APIs
 ├── analytics/          # Reporting summaries
+├── frontend/           # React dashboard & submission UI
 ├── media/              # Secure file storage
 └── logs/               # System event logs
 ```
@@ -72,6 +74,13 @@ python manage.py createsuperuser
 ### 7. Run Server
 ```bash
 python manage.py runserver
+```
+
+### 8. Frontend Setup
+```bash
+cd frontend
+npm install
+npm run dev
 ```
 
 ## API Documentation

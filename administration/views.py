@@ -1,18 +1,19 @@
-from rest_framework import generics, permissions
+from rest_framework import generics
 from complaints.models import Complaint
 from complaints.serializers import ComplaintStatusSerializer
 from rest_framework.response import Response
 from security.utils import encryption_tool
+from core.permissions import IsStaffUserOrDevOpen
 
 class AdminComplaintListView(generics.ListAPIView):
     queryset = Complaint.objects.all()
     serializer_class = ComplaintStatusSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsStaffUserOrDevOpen]
 
 class AdminComplaintDetailView(generics.RetrieveUpdateAPIView):
     queryset = Complaint.objects.all()
     serializer_class = ComplaintStatusSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsStaffUserOrDevOpen]
     lookup_field = 'tracking_id'
 
     def retrieve(self, request, *args, **kwargs):
@@ -25,7 +26,7 @@ class AdminComplaintDetailView(generics.RetrieveUpdateAPIView):
 class AdminComplaintStatusUpdateView(generics.UpdateAPIView):
     queryset = Complaint.objects.all()
     serializer_class = ComplaintStatusSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsStaffUserOrDevOpen]
     lookup_field = 'tracking_id'
 
     def perform_update(self, serializer):

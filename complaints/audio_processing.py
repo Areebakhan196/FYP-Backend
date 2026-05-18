@@ -6,12 +6,13 @@ logger = logging.getLogger('complaints')
 
 def process_audio(file_path):
     """
-    Placeholder for audio processing logic.
-    Can be used for:
-    - Normalization
-    - Transcription (using SpeechRecognition)
-    - Metadata removal
+    Optional post-processing. Browser recordings (webm/m4a/ogg) are left as-is
+    so quality is not reduced by re-encoding.
     """
+    ext = os.path.splitext(file_path)[1].lower()
+    if ext in ('.webm', '.opus', '.m4a', '.mp4', '.ogg'):
+        logger.info("Skipping transcoding for %s to preserve original quality.", ext)
+        return file_path
     try:
         # Example: Metadata removal and conversion to standard format
         audio = AudioSegment.from_file(file_path)
