@@ -1,8 +1,11 @@
-from pydub import AudioSegment
 import os
 import logging
 
 logger = logging.getLogger('complaints')
+
+# Formats we keep as-is (browser recordings). No pydub import required.
+_SKIP_TRANSCODE_EXTENSIONS = ('.webm', '.opus', '.m4a', '.mp4', '.ogg')
+
 
 def process_audio(file_path):
     """
@@ -10,11 +13,13 @@ def process_audio(file_path):
     so quality is not reduced by re-encoding.
     """
     ext = os.path.splitext(file_path)[1].lower()
-    if ext in ('.webm', '.opus', '.m4a', '.mp4', '.ogg'):
+    if ext in _SKIP_TRANSCODE_EXTENSIONS:
         logger.info("Skipping transcoding for %s to preserve original quality.", ext)
         return file_path
     try:
-        # Example: Metadata removal and conversion to standard format
+        # Lazy import: pydub pulls in audioop (removed in Python 3.13+).
+        from pydub import AudioSegment
+
         audio = AudioSegment.from_file(file_path)
         base_name = os.path.splitext(file_path)[0]
         output_path = f"{base_name}_processed.mp3"

@@ -28,6 +28,7 @@ function extForBlobType(mime) {
 export function useAudioRecorder() {
   const [phase, setPhase] = useState('idle'); // idle | recording | stopped
   const [seconds, setSeconds] = useState(0);
+  const [recordedDuration, setRecordedDuration] = useState(0);
   const [error, setError] = useState(null);
   const [blob, setBlob] = useState(null);
   const mediaRecorderRef = useRef(null);
@@ -35,6 +36,7 @@ export function useAudioRecorder() {
   const streamRef = useRef(null);
   const timerRef = useRef(null);
   const mimeRef = useRef('');
+  const startedAtRef = useRef(null);
 
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
@@ -46,8 +48,10 @@ export function useAudioRecorder() {
   const start = useCallback(async () => {
     setError(null);
     setBlob(null);
+    setRecordedDuration(0);
     chunksRef.current = [];
     clearTimer();
+    startedAtRef.current = null;
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -74,16 +78,23 @@ export function useAudioRecorder() {
       mr.onstop = () => {
         const type = mimeRef.current || 'audio/webm';
         const b = new Blob(chunksRef.current, { type });
+        const elapsedSec = startedAtRef.current
+          ? Math.round((Date.now() - startedAtRef.current) / 1000)
+          : 0;
+        setRecordedDuration(elapsedSec);
+        setSeconds(elapsedSec);
         setBlob(b);
         setPhase('stopped');
         stream.getTracks().forEach((t) => t.stop());
         streamRef.current = null;
         mediaRecorderRef.current = null;
+        startedAtRef.current = null;
       };
 
       mr.start(500);
       setPhase('recording');
       setSeconds(0);
+      startedAtRef.current = Date.now();
       timerRef.current = setInterval(() => setSeconds((s) => s + 1), 1000);
     } catch (e) {
       setError(
@@ -129,8 +140,10 @@ export function useAudioRecorder() {
     mimeRef.current = '';
     setBlob(null);
     setSeconds(0);
+    setRecordedDuration(0);
     setPhase('idle');
     setError(null);
+    startedAtRef.current = null;
   }, [clearTimer]);
 
   useEffect(() => {
@@ -151,6 +164,7 @@ export function useAudioRecorder() {
   return {
     phase,
     seconds,
+    recordedDuration,
     error,
     blob,
     start,

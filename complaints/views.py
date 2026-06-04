@@ -21,14 +21,23 @@ class ComplaintCreateView(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
-        instance = Complaint.objects.get(tracking_id=response.data.get('tracking_id'))
-        
-        # Trigger audio processing if file exists
-        if instance.audio_file:
-            from .audio_processing import process_audio
-            process_audio(instance.audio_file.path)
-            
-        logger.info(f"Complaint submitted successfully. Tracking ID: {response.data.get('tracking_id')}")
+        tracking_id = response.data.get('tracking_id')
+
+        # Post-processing must not fail a successful submission (DB row already exists).
+        if response.status_code == status.HTTP_201_CREATED and tracking_id:
+            try:
+                instance = Complaint.objects.get(tracking_id=tracking_id)
+                if instance.audio_file:
+                    from .audio_processing import process_audio
+                    process_audio(instance.audio_file.path)
+            except Exception as exc:
+                logger.warning(
+                    "Complaint %s saved; optional audio processing skipped: %s",
+                    tracking_id,
+                    exc,
+                )
+
+        logger.info("Complaint submitted successfully. Tracking ID: %s", tracking_id)
         return response
 
 class ComplaintStatusView(generics.RetrieveAPIView):

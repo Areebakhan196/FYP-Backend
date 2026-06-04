@@ -14,6 +14,7 @@ import { toast } from 'react-toastify';
 import { complaintService } from '../services/api';
 import { useComplaint } from '../context/ComplaintContext';
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
+import { getAudioDurationSeconds } from '../utils/audioDuration';
 
 function formatDuration(totalSeconds) {
   const m = Math.floor(totalSeconds / 60);
@@ -26,6 +27,7 @@ const LandingPage = () => {
   const {
     phase: recordPhase,
     seconds: recordSeconds,
+    recordedDuration,
     error: recordError,
     blob: recordBlob,
     start: startRecording,
@@ -36,6 +38,7 @@ const LandingPage = () => {
   const audioFileInputRef = useRef(null);
 
   const [mode, setMode] = useState('text');
+  const [previewDurationSec, setPreviewDurationSec] = useState(null);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     category: 'General',
@@ -80,7 +83,33 @@ const LandingPage = () => {
       type: recordBlob.type || 'audio/webm',
     });
     setFormData((prev) => ({ ...prev, audioFile: file }));
-  }, [recordPhase, recordBlob, extForBlobType]);
+    if (recordedDuration > 0) {
+      setPreviewDurationSec(recordedDuration);
+    }
+  }, [recordPhase, recordBlob, extForBlobType, recordedDuration]);
+
+  useEffect(() => {
+    if (!formData.audioFile) {
+      setPreviewDurationSec(null);
+      return undefined;
+    }
+
+    let cancelled = false;
+
+    if (recordPhase === 'stopped' && recordedDuration > 0) {
+      setPreviewDurationSec(recordedDuration);
+    }
+
+    getAudioDurationSeconds(formData.audioFile).then((sec) => {
+      if (!cancelled && sec != null && sec > 0) {
+        setPreviewDurationSec(sec);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [formData.audioFile, recordPhase, recordedDuration]);
 
   const handleAudioFileChange = (e) => {
     const file = e.target.files?.[0];
@@ -108,6 +137,7 @@ const LandingPage = () => {
 
   const handleClearAudio = () => {
     discardRecording();
+    setPreviewDurationSec(null);
     setFormData((prev) => ({ ...prev, audioFile: null }));
     if (audioFileInputRef.current) audioFileInputRef.current.value = '';
   };
@@ -292,8 +322,15 @@ const LandingPage = () => {
 
                 {formData.audioFile && recordPhase !== 'recording' && audioPreviewUrl && (
                   <div className="rounded-lg border border-slate-700 bg-navy-900/50 p-4">
-                    <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">Preview</p>
-                    <audio controls className="w-full" src={audioPreviewUrl}>
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs text-slate-500 uppercase tracking-wider">Preview</p>
+                      {previewDurationSec != null && previewDurationSec > 0 && (
+                        <p className="text-sm font-medium text-emerald-400 tabular-nums">
+                          Duration: {formatDuration(previewDurationSec)}
+                        </p>
+                      )}
+                    </div>
+                    <audio controls preload="metadata" className="w-full" src={audioPreviewUrl}>
                       Preview not supported.
                     </audio>
                   </div>
