@@ -1,6 +1,8 @@
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.utils.decorators import method_decorator
 from rest_framework import status, generics, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -80,6 +82,13 @@ class StudentLogoutView(APIView):
         # Standard Django Logout (clears session)
         logout(request)
         return Response({"message": "Logged out successfully."}, status=status.HTTP_200_OK)
+
+@method_decorator(ensure_csrf_cookie, name='dispatch')
+class CsrfTokenView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        return Response({"detail": "CSRF token cookie set."}, status=status.HTTP_200_OK)
 
 class ForgotPasswordView(APIView):
     permission_classes = [permissions.AllowAny]

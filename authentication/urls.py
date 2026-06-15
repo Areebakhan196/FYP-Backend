@@ -4,6 +4,7 @@ from .views import (
     EmailVerificationView,
     StudentLoginView,
     StudentLogoutView,
+    CsrfTokenView,
     ForgotPasswordView,
     UserMeView
 )
@@ -13,6 +14,7 @@ urlpatterns = [
     path('verify-email/<str:token>/', EmailVerificationView.as_view(), name='verify-email'),
     path('login/', StudentLoginView.as_view(), name='login'),
     path('logout/', StudentLogoutView.as_view(), name='logout'),
+    path('csrf/', CsrfTokenView.as_view(), name='csrf'),
     path('forgot-password/', ForgotPasswordView.as_view(), name='forgot-password'),
     path('me/', UserMeView.as_view(), name='me'),
 ]

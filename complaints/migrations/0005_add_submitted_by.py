@@ -16,6 +16,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='complaint',
             name='submitted_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='complaints_submitted', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(blank=True, null=True, db_constraint=False, on_delete=django.db.models.deletion.SET_NULL, related_name='complaints_submitted', to=settings.AUTH_USER_MODEL),
         ),
     ]

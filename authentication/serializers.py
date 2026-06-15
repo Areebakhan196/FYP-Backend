@@ -62,8 +62,13 @@ class ForgotPasswordSerializer(serializers.Serializer):
     confirm_password = serializers.CharField(write_only=True, required=True)
 
     def validate_email(self, value):
-        if not User.objects.filter(email=value).exists():
+        users = User.objects.filter(email=value)
+        if not users.exists():
             raise serializers.ValidationError("User with this email does not exist.")
+        if users.count() > 1:
+            raise serializers.ValidationError(
+                "Multiple accounts are registered with this email address. Please contact support."
+            )
         return value
 
     def validate(self, attrs):
@@ -74,7 +79,9 @@ class ForgotPasswordSerializer(serializers.Serializer):
     def save(self):
         email = self.validated_data['email']
         password = self.validated_data['password']
-        user = User.objects.get(email=email)
+        user = User.objects.filter(email=email).first()
+        if not user:
+            raise serializers.ValidationError("User with this email does not exist.")
         user.set_password(password)
         user.save()
         return user

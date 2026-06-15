@@ -31,8 +31,15 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173',
     'http://localhost:5174',
     'http://127.0.0.1:5173',
+    'http://127.0.0.1:5173',
     'http://127.0.0.1:5174',
 ]
+
+# CORS Configuration
+# For production, you might want to specify CORS_ALLOWED_ORIGINS instead of allowing all
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
 
 # Application definition
 INSTALLED_APPS = [
@@ -44,6 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     # Third party apps
+    'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
     'cloudinary_storage',
@@ -59,6 +67,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -91,6 +101,10 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 DATABASES = {
     'default': env.db(),
+}
+# Force SSL connection for TiDB
+DATABASES['default']['OPTIONS'] = {
+    'ssl': {'ssl_mode': 'REQUIRED'}
 }
 
 # Password validation
